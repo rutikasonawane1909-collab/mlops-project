@@ -1,0 +1,43 @@
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo 'Source code checked out'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                bat 'python -m pip install -r requirements.txt'
+            }
+        }
+
+        stage('Train ML Model') {
+            steps {
+                bat 'python train.py'
+            }
+        }
+
+        stage('Test Application') {
+            steps {
+                bat 'python -c "from app import app; print(app.test_client().get(chr(47)).status_code)"'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                bat 'docker build -t iris-mlops:latest .'
+            }
+        }
+
+        stage('Deployment Ready') {
+            steps {
+                echo 'Build and testing completed.'
+            }
+        }
+    }
+}
